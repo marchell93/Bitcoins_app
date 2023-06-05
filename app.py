@@ -1,4 +1,5 @@
 import fastapi
+from fastapi import Request
 import database
 import pydantic_models
 import config
@@ -11,55 +12,58 @@ response = {'Answer': 'Which response server'}
 fake_database = {
     'users': [
         {
-            "id": 1,             # тут тип данных - число
-            "name": "Anna",      # тут строка
-            "nick": "Anny42",    # и тут
-            "balance": 15.01    # а тут float
-         },
+            "id": 1,  # тут тип данных - число
+            "name": "Anna",  # тут строка
+            "nick": "Anny42",  # и тут
+            "balance": 15.01  # а тут float
+        },
 
         {
-            "id": 2,             # у второго пользователя
-            "name": "Dima",      # такие же
-            "nick": "dimon2319", # типы
-            "balance": 8.01     # данных
-         },
+            "id": 2,  # у второго пользователя
+            "name": "Dima",  # такие же
+            "nick": "dimon2319",  # типы
+            "balance": 8.01  # данных
+        },
         {
-            "id": 3,             # у третьего
+            "id": 3,  # у третьего
             "name": "Vladimir",  # юзера
-            "nick": "Vova777",   # мы специально сделаем
-            "balance": "23"     # нестандартный тип данных в его балансе
+            "nick": "Vova777",  # мы специально сделаем
+            "balance": "23"  # нестандартный тип данных в его балансе
         }
     ],
 }
-
 
 fake_database_2 = {
     'users': [
         {
-            "id": 1,             # тут тип данных - число
-            "name": "Anna",      # тут строка
-            "nick": "Anny42",    # и тут
-            "balance": 15300    # а тут int
-         },
+            "id": 1,  # тут тип данных - число
+            "name": "Anna",  # тут строка
+            "nick": "Anny42",  # и тут
+            "balance": 15300  # а тут int
+        },
 
         {
-            "id": 2,             # у второго пользователя
-            "name": "Dima",      # такие же
-            "nick": "dimon2319", # типы
-            "balance": 160.23     # float
-         },
+            "id": 2,  # у второго пользователя
+            "name": "Dima",  # такие же
+            "nick": "dimon2319",  # типы
+            "balance": 160.23  # float
+        },
         {
-            "id": 3,             # у третьего
+            "id": 3,  # у третьего
             "name": "Vladimir",  # юзера
-            "nick": "Vova777",   # мы специально сделаем
-            "balance": "25000"     # нестандартный тип данных в его балансе
+            "nick": "Vova777",  # мы специально сделаем
+            "balance": "25000"  # нестандартный тип данных в его балансе
         }
     ],
 }
 
+
 @api.get('/')
-def index():
-    return response
+@api.post('/')
+@api.put('/')
+@api.delete('/')
+def index(request: Request):
+    return {"Request": [request.method, request.headers]}
 
 
 @api.get('/static/path', tags=['first_test_endpoints'])
@@ -111,7 +115,7 @@ def get_total_balance():
 
 
 @api.get('/users')
-def get_users(skip: int, limit: int):
+def get_users(skip: int = 0, limit: int = 20):
     return fake_database['users'][skip: skip + limit]
 
 
@@ -120,3 +124,10 @@ def get_user(user_id: str, query: Optional[str] = None):
     if query is not None:
         return {'user_id': user_id, 'query': query}
     return {'user_id': user_id}
+
+
+@api.post('/user/create')
+def create_user(user: pydantic_models.User):
+    fake_database['users'].append(user)
+    return {'User created!': user}
+
